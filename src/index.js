@@ -1,28 +1,43 @@
-const express = require('express');
-const sequelize = require('../database/coneccion/database');
-const User = require('../database/models/Users');
+const express = require('express')
+const sequelize = require('./database/index');
+const bodyParser = require('body-parser');
+const path = require('path');
+const cors = require('cors');
+const session = require('express-session')
 
 /**
  * Configuraciones, y CORS
  */
-
 const app = express();
+app.set('PORT', 3000);
+app.use(session({
+    secret: 'keyboard cat',
+    resave: false,
+    saveUninitialized: true,
+    cookie: { secure: true }
+}))
+app.use(express.urlencoded({ extended: true }));
+app.use(bodyParser.json());
+app.set('key', process.env.CLAVE);
+app.set('public', path.join(__dirname, 'public'));
+app.use('/static', express.static(app.get('public')));
+console.log(app.get('public'));
 
-app.get('/', (req, res)=>{
-    User.create({
-        username: 'janedoe',
-        birthday: new Date(1980, 6, 20)
-      });
-    res.send("hola mundo");
-})
+app.use(cors());
 
-app.listen(3000, ()=>{
-    console.log("listen app in port 3000");
-    sequelize.authenticate()
-    .then(() => {
-        console.log('Conectado')
+app.use('/instrumental/create', require('./midelware/authvendedor'));
+app.use('/upload', require('./midelware/authvendedor'));
+
+app.use('/usuario', require('./app/Usuarios/ruta'));
+app.use('/mercadopago', require('./app/Mercadopago/ruta'));
+app.use('/upload/', require('./app/Uploads/ruta'));
+app.use('/instrumental', require('./app/Instrumentales/ruta'));
+
+app.listen(app.get('PORT'), () => {
+    sequelize.authenticate().then(() => {
+        console.log("se conecto con exito!!");
+    }).catch((err) => {
+        console.log(err);
     })
-    .catch(err => {
-        console.log('No se conecto')
-    })
+    console.log("listen to port " + app.get('PORT'));
 })

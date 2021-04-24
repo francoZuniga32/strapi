@@ -1,25 +1,37 @@
 {
-  "name": "cooking-beats-backend",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/cookingbeats/cooking-beats-backend.git"
-  },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "bugs": {
-    "url": "https://github.com/cookingbeats/cooking-beats-backend/issues"
-  },
-  "homepage": "https://github.com/cookingbeats/cooking-beats-backend#readme",
-  "dependencies": {
-    "express": "^4.17.1",
-    "mysql2": "^2.2.5",
-    "sequelize": "^6.5.0"
-  }
+    "name": "cooking-beats-backend",
+    "version": "1.0.0",
+    "description": "",
+    "main": "index.js",
+    "scripts": {
+        "dev": "nodemon src/index.js",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "repository": {
+        "type": "git",
+        "url": "git+https://github.com/cookingbeats/cooking-beats-backend.git"
+    },
+    "keywords": [],
+    "author": "",
+    "license": "ISC",
+    "bugs": {
+        "url": "https://github.com/cookingbeats/cooking-beats-backend/issues"
+    },
+    "homepage": "https://github.com/cookingbeats/cooking-beats-backend#readme",
+    "dependencies": {
+        "body-parser": "^1.19.0",
+        "cors": "^2.8.5",
+        "dotenv": "^8.2.0",
+        "express": "^4.17.1",
+        "express-session": "^1.17.1",
+        "jsonwebtoken": "^8.5.1",
+        "mercadopago": "^1.5.7",
+        "multer": "^1.4.2",
+        "mysql2": "^2.2.5",
+        "nodemon": "^2.0.7",
+        "sequelize": "^6.5.0"
+    },
+    "devDependencies": {
+        "sequelize-cli": "^6.2.0"
+    }
 }
