@@ -134,6 +134,7 @@ controlador.minuatura = async(req, res) => {
         }
         var token = req.headers['access-token'];
         var usuario = jwt.verify(token, process.env.CLAVE);
+
         if (usuario) {
             var file = await Files.create({
                 user: usuario.id,

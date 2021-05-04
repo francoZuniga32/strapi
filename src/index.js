@@ -32,6 +32,7 @@ app.use('/usuario', require('./app/Usuarios/ruta'));
 app.use('/mercadopago', require('./app/Mercadopago/ruta'));
 app.use('/upload/', require('./app/Uploads/ruta'));
 app.use('/instrumental', require('./app/Instrumentales/ruta'));
+app.use('/vendedor', require('./app/Vendedor/ruta'));
 
 app.listen(app.get('PORT'), () => {
     sequelize.authenticate().then(() => {

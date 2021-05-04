@@ -6,7 +6,7 @@ mercadopago.configure({
 })
 
 const controlador = {};
-const Usuario = require('../../database/models/usuarios')
+const Usuario = require('../../database/models/usuarios');
 
 controlador.register = async(req, res) => {
     console.log(req.body);
