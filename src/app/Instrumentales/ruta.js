@@ -6,7 +6,7 @@ ruta.get('/:id', controlador.instrumental.get);
 ruta.get('/user/:id', controlador.instrumental.user);
 ruta.get('/me', controlador.instrumental.me);
 
-ruta.post('/', controlador.instrumental.post);
+ruta.post('/create', controlador.instrumental.post);
 
 ruta.put('/', controlador.instrumental.put);
 ruta.delete('/', controlador.instrumental.delate);

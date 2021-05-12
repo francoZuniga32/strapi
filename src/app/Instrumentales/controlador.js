@@ -1,6 +1,7 @@
 const controlador = {};
 const Instrumental = require('../../database/models/instrumentales');
-const { Op } = require('sequelize');
+const sequelize = require('../../database/index');
+const { QueryTypes } = require('sequelize');
 const jwt = require('jsonwebtoken');
 const Vendedores = require('../../database/models/vendedores');
 const mercadopago = require('mercadopago');
@@ -15,15 +16,14 @@ controlador.get = async(req, res) => {
         var page = req.query.page;
         var cantidad = 30;
         var inicio = (cantidad * (page - 1) == 0) ? 1 : cantidad * (page - 1);
+        var sqlInstrumentales =
+            ``;
 
-        await Instrumental.findAll({
-            where: {
-                id: inicio
-            },
-            limit: cantidad
-        }).then((resultado) => {
-            instrumentales = resultado;
+        var instrumentales = await sequelize.query(sqlInstrumentales, {
+            replacements: [inicio, cantidad],
+            type: QueryTypes.SELECT
         });
+
         res.status(200).json(instrumentales);
     } else {
         res.status(204).send();
@@ -40,10 +40,9 @@ controlador.instrumental = {};
 controlador.instrumental.get = async(req, res) => {
     if (req.params != undefined) {
         var instrumentalid = req.params.id;
-        var instrumental = await Instrumental.findOne({
-            where: {
-                id: instrumentalid
-            }
+        var instrumental = await sequelize.query('', {
+            replacements: [],
+            type: QueryTypes.SELECT
         });
         (instrumental != null) ? res.status(200).json(instrumental): res.status(203).send();
     } else {
@@ -118,7 +117,7 @@ controlador.instrumental.post = async(req, res) => {
     console.log(req.body);
     if (req.body != undefined && req.headers['access-token']) {
         var decoded = jwt.decode(req.headers['access-token'], process.env.CLAVE);
-        var instrumental = await Instrumental.findOne({
+        var instrumental = await Instrumental.findOrCreate({
             where: {
                 nombre: req.body.nombre,
                 descripcion: req.body.descripcion,
@@ -130,35 +129,14 @@ controlador.instrumental.post = async(req, res) => {
                 mp3: req.body.mp3,
                 wav: req.body.wav,
                 sample: req.body.sample,
-                vendedor: decoded.usuario.id,
                 licencia: req.body.licencia,
                 createdAt: new Date(),
                 updatedAt: new Date()
             }
-        }).then();
+        });
         console.log(instrumental)
-        if (!instrumental) {
-            instrumental = await Instrumental.create({
-                nombre: req.body.nombre,
-                descripcion: req.body.descripcion,
-                precio: req.body.precio,
-                categoria: req.body.categoria,
-                minuatura: req.body.minuatura,
-                bpm: req.body.bpm,
-                escala: req.body.escala,
-                mp3: req.body.mp3,
-                wav: req.body.wav,
-                sample: req.body.sample,
-                vendedor: decoded.usuario.id,
-                licencia: req.body.licencia,
-                createdAt: new Date(),
-                updatedAt: new Date()
-            }).then();
-            if (instrumental) res.status(200).json(instrumental);
-            else res.status(203).send({ "mensaje": "hubo un error al crear el instrumental" });
-        } else {
-            res.status(203).send({ "mensaje": "El instrumental ya existe" });
-        }
+        if (instrumental) res.status(200).json(instrumental);
+        else res.status(203).send({ "mensaje": "hubo un error al crear el instrumental" });
     } else {
         res.status(203).send();
     }
