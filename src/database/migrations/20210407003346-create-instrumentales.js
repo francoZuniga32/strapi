@@ -29,6 +29,15 @@ module.exports = {
             escala: {
                 type: Sequelize.STRING
             },
+            mp3: {
+                type: Sequelize.STRING
+            },
+            wav: {
+                type: Sequelize.STRING
+            },
+            sample: {
+                type: Sequelize.STRING
+            },
             vendedor: {
                 type: Sequelize.INTEGER
             },
