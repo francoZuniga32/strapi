@@ -6,6 +6,9 @@ const jwt = require('jsonwebtoken');
 const Vendedores = require('../../database/models/vendedores');
 const mercadopago = require('mercadopago');
 const Files = require('../../database/models/files');
+const Compras = require('../../database/models/compras');
+const ComprasInstrumental = require('../../database/models/carritos_instrumentales');
+const Instrumentales = require('../../database/models/instrumentales');
 
 /**
  * mostramos de forma paginada los datos de los instrumentales
@@ -82,12 +85,20 @@ controlador.instrumental.me = async(req, res) => {
 }
 
 controlador.instrumental.buy = async(req, res) => {
-    if (req.params.id) {
+    if (req.params.id && req.headers['access-token']) {
         var vendedor = await sequelize.query("SELECT * FROM Instrumentales, Vendedores WHERE Instrumentales.vendedor = Vendedores.idusuario AND Vendedores.idusuario = ?", {
             replacements: [req.params.id],
             type: QueryTypes.SELECT
         });
-        if (vendedor && vendedor[0].mercadopago != undefined) {
+
+        var instrumental = await Instrumentales.findOne({
+            where: {
+                id: req.params.id
+            }
+        });
+
+        var comprador = jwt.verify(req.headers['access-token'], process.env.CLAVE);
+        if (vendedor && vendedor[0].mercadopago != undefined && instrumental) {
             vendedor[0].mercadopago = JSON.parse(vendedor[0].mercadopago);
             console.log(vendedor[0].mercadopago.body);
             mercadopago.configure({
@@ -100,8 +111,25 @@ controlador.instrumental.buy = async(req, res) => {
                     quantity: 1,
                     currency_id: 'ARS',
                     unit_price: vendedor[0].precio
-                }]
+                }],
+                back_urls: {
+                    success: 'http://localhost:3000/compras/',
+                    pending: 'http://localhost:3000/compras/',
+                    failure: 'http://localhost:3000/compras/'
+                }
             };
+            preference.marketplace_fee = await porcentaje(vendedor[0].precio);
+
+            var compra = await Compras.create({
+                usuario: comprador.usuario.id
+            });
+            preference.external_reference = compra.getDataValue('external_reference');
+            var idcompra = await compra.getDataValue('id');
+
+            await sequelize.query('INSERT INTO `Carritos-Instrumentales`(`idcompra`, `idinstrumental`, `createdAt`, `updatedAt`) VALUES (?,?,?,?)', {
+                replacements: [await compra.getDataValue('id'), req.params.id, new Date(), new Date()],
+                type: QueryTypes.INSERT
+            });
 
             mercadopago.preferences.create(preference).then(data => {
                 res.status(200).send({ "body": data });
@@ -191,6 +219,12 @@ controlador.delate = async(req, res) => {
     } else {
         res.status(203).send();
     }
+}
+
+async function porcentaje(precio) {
+    const porcentaje = 5;
+    var retorno = (porcentaje / 100) * precio;
+    return parseFloat(retorno);
 }
 
 module.exports = controlador;

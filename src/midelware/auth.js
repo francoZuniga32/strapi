@@ -10,10 +10,10 @@ const auth = async(req, res, next) => {
         console.log(decoded);
         var row = await Usuario.findOne({
             where: {
-                token: decoded
+                token: decoded.usuario.token
             }
         });
-        if (row.length > 0) {
+        if (row) {
             next();
         } else {
             res.status(203).json({ "mensaje": "el usuario no esta registrado" });

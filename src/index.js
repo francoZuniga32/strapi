@@ -28,6 +28,8 @@ app.use(cors());
 app.use('/instrumental/create', require('./midelware/authvendedor'));
 app.use('/upload', require('./midelware/authvendedor'));
 app.use('/instrumental/me', require('./midelware/authvendedor'));
+app.use('/instrumental/buy', require('./midelware/auth'));
+app.use('/compras', require('./midelware/auth'));
 
 app.use('/usuario', require('./app/Usuarios/ruta'));
 app.use('/mercadopago', require('./app/Mercadopago/ruta'));
@@ -35,6 +37,7 @@ app.use('/upload/', require('./app/Uploads/ruta'));
 app.use('/instrumental', require('./app/Instrumentales/ruta'));
 app.use('/albumes', require('./app/Albumes/ruta'));
 app.use('/vendedor', require('./app/Vendedor/ruta'));
+app.use('/compras', require('./app/Compras/ruta'));
 
 app.listen(app.get('PORT'), () => {
     sequelize.authenticate().then(() => {

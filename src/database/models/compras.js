@@ -5,7 +5,7 @@ class Compras extends Model {}
 
 Compras.init({
     pymentid: DataTypes.STRING,
-    external_reference: DataTypes.STRING,
+    external_reference: { type: DataTypes.UUIDV4, defaultValue: DataTypes.UUIDV4 },
     status: DataTypes.STRING,
     usuario: DataTypes.INTEGER
 }, {

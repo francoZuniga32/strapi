@@ -1,8 +1,8 @@
 const { Model, DataTypes } = require('sequelize');
 const sequelize = require('../index');
 
-class Carritos extends Model {}
-Carritos - Instrumentales.init({
+class Carritos_Instrumentales extends Model {}
+Carritos_Instrumentales.init({
     idcompra: DataTypes.INTEGER,
     idinstrumental: DataTypes.INTEGER
 }, {
@@ -10,4 +10,4 @@ Carritos - Instrumentales.init({
     modelName: 'Carritos-Instrumentales',
 });
 
-module.exports = Carritos;
+module.exports = Carritos_Instrumentales;
