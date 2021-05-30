@@ -1,25 +1,29 @@
-const jwt = require('jsonwebtoken');
-const Vendedores = require('../database/models/vendedores');
+const jwt = require("jsonwebtoken");
+const Vendedores = require("../database/models/vendedores");
 
 const auth = async(req, res, next) => {
-    if (req.headers['access-token']) {
-        var token = req.headers['access-token'];
-        var decoded = jwt.verify(token, process.env.CLAVE);
+    if (req.headers["access-token"]) {
+        var token = req.headers["access-token"];
+        try {
+            var decoded = jwt.verify(token, process.env.CLAVE);
 
-        var vendedor = await Vendedores.findOne({
-            attributes: ['idusuario'],
-            where: {
-                idusuario: decoded.usuario.id
+            var vendedor = await Vendedores.findOne({
+                attributes: ["idusuario"],
+                where: {
+                    idusuario: decoded.usuario.id,
+                },
+            });
+            if (vendedor != null) {
+                next();
+            } else {
+                res.status(203).json({ mensaje: "el usuario no es un vendedor" });
             }
-        });
-        if (vendedor != null) {
-            next();
-        } else {
-            res.status(203).json({ "mensaje": "el usuario no es un vendedor" });
+        } catch (error) {
+            res.status(401).send({ error: error });
         }
     } else {
-        res.status(203).send({ "mensaje": "no esta provisto el token" });
+        res.status(203).send({ mensaje: "no esta provisto el token" });
     }
-}
+};
 
 module.exports = auth;
