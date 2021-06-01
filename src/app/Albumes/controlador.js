@@ -1,4 +1,5 @@
 const controlador = {};
+const 
 const Albumes = require('../../database/models/albumes');
 const sequelize = require('../../database/index');
 const { QueryTypes, AsyncQueueError } = require('sequelize');
@@ -51,6 +52,12 @@ controlador.user = async(req, res) => {
         res.status(200).send(row);
     } else {
         res.status(203).send();
+    }
+}
+
+controlador.buy = async(req, res) => {
+    if (req.params.id != undefined) {
+        
     }
 }
 
