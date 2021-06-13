@@ -1,14 +1,14 @@
-const { Model, DataTypes } = require('sequelize');
-const sequelize = require('../index');
+const { Model, DataTypes } = require("sequelize");
+const sequelize = require("../index");
 
 class Vendedores extends Model {}
 Vendedores.init({
     idusuario: DataTypes.INTEGER,
     banner: DataTypes.STRING,
-    mercadopago: DataTypes.JSON
+    mercadopago: DataTypes.JSON,
 }, {
     sequelize,
-    modelName: 'Vendedores',
+    modelName: "Vendedores",
 });
 
 module.exports = Vendedores;

@@ -2,6 +2,7 @@ const jwt = require("jsonwebtoken");
 const Vendedores = require("../database/models/vendedores");
 
 const auth = async(req, res, next) => {
+    console.log(req.headers["access-token"]);
     if (req.headers["access-token"]) {
         var token = req.headers["access-token"];
         try {

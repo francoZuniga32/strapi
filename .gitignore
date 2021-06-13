@@ -132,4 +132,10 @@ dist/
 tmp/
 temp/
 
+
+src/public/sample/*
+src/public/minuatura/*
+src/public/mp3/*
+src/public/banners/*
+
 # End of https://www.toptal.com/developers/gitignore/api/node

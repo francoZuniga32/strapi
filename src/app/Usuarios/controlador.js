@@ -1,28 +1,58 @@
-const jwt = require('jsonwebtoken');
-const crypto = require('crypto');
-const mercadopago = require('mercadopago');
+const jwt = require("jsonwebtoken");
+const crypto = require("crypto");
+const mercadopago = require("mercadopago");
 mercadopago.configure({
-    access_token: process.env.ACCESS_TOKEN
-})
+    access_token: process.env.ACCESS_TOKEN,
+});
 
 const controlador = {};
-const Usuario = require('../../database/models/usuarios');
+const Usuario = require("../../database/models/usuarios");
+const Vendedor = require("../../database/models/vendedores");
+const sequelize = require("../../database/index");
+const { QueryTypes } = require("sequelize");
 
 controlador.register = async(req, res) => {
     console.log(req.body);
     if (req.body != undefined) {
-        var data = {
-            nombreusuario: req.body.nombreusuario,
-            email: req.body.email,
-            contraseña: sha256(req.body.contraseña),
-            foto: null
+        var usuario = await Usuario.findOne({
+            where: {
+                nombreusuario: req.body.nombre,
+                contraseña: req.body.contrasenia,
+            },
+        });
+        console.log(usuario);
+        if (usuario == null) {
+            var row = await Usuario.create({
+                nombreusuario: req.body.nombre,
+                email: req.body.email,
+                contraseña: req.body.contrasenia,
+                foto: null,
+            });
+
+            const token = jwt.sign({ usuario: row }, process.env.CLAVE, {
+                expiresIn: "3h",
+            });
+            row.token = token;
+            if (req.body.productor) {
+                const vendedor = await sequelize.query(
+                    "INSERT INTO `Vendedores`(`idusuario`, `createdAt`, `updatedAt`) VALUES (?,?,?)", {
+                        replacements: [
+                            await row.getDataValue("id"),
+                            new Date(),
+                            new Date(),
+                        ],
+                        type: QueryTypes,
+                    }
+                );
+            }
+            res.json(row);
+        } else {
+            res.status(203).send();
         }
-        var row = await Usuario.create(data);
-        res.json(row);
     } else {
         res.status(204).send();
     }
-}
+};
 
 controlador.auth = async(req, res) => {
     if (req.body != undefined) {
@@ -30,18 +60,17 @@ controlador.auth = async(req, res) => {
             var usuario = await Usuario.findOne({
                 where: {
                     email: req.body.email,
-                    contraseña: req.body.contraseña
-                }
+                    contraseña: req.body.contraseña,
+                },
             });
             if (!usuario) {
                 res.status(203).json({
-                    "mensaje": "el usuario no esta registrado"
+                    mensaje: "el usuario no esta registrado",
                 });
             } else {
-
                 //creamos el toke de usuario
-                const token = jwt.sign({ "usuario": usuario }, process.env.CLAVE, {
-                    expiresIn: '3h'
+                const token = jwt.sign({ usuario: usuario }, process.env.CLAVE, {
+                    expiresIn: "3h",
                 });
                 usuario.token = token;
                 res.json(usuario);
@@ -52,10 +81,10 @@ controlador.auth = async(req, res) => {
     } else {
         res.status(204).send();
     }
-}
+};
 
 function sha256(pwd) {
-    return crypto.createHash('sha256').update(pwd).digest('hex');
+    return crypto.createHash("sha256").update(pwd).digest("hex");
 }
 
 module.exports = controlador;
