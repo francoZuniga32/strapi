@@ -89,9 +89,12 @@ controlador.instrumental.me = async(req, res) => {
 };
 
 controlador.instrumental.buy = async(req, res) => {
-    if (req.params.id && req.headers["access-token"]) {
+    console.log(
+        req.params.id != undefined && req.headers["access-token"] != undefined
+    );
+    if (req.params.id != undefined && req.headers["access-token"] != undefined) {
         var vendedor = await sequelize.query(
-            "SELECT * FROM Instrumentales, Vendedores WHERE Instrumentales.vendedor = Vendedores.idusuario AND Vendedores.idusuario = ?", {
+            "SELECT Vendedores.* FROM Instrumentales, Vendedores WHERE Instrumentales.vendedor = Vendedores.idusuario AND Instrumentales.id = ?", {
                 replacements: [req.params.id],
                 type: QueryTypes.SELECT,
             }

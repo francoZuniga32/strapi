@@ -1,39 +1,44 @@
 const controlador = {};
-const mercadopago = require('mercadopago');
-const Vendedores = require('../../database/models/vendedores');
-const jwt = require('jsonwebtoken');
+const mercadopago = require("mercadopago");
+const Vendedores = require("../../database/models/vendedores");
+const jwt = require("jsonwebtoken");
 mercadopago.configure({
-    access_token: process.env.ACCESS_TOKEN
+    access_token: process.env.ACCESS_TOKEN,
 });
-
 
 controlador.mercadopago = {};
 
 controlador.mercadopago.auth = async(req, res) => {
     var url = "http://localhost:33487/vendedor/configuracion";
     var app = process.env.MP_CLIENTID;
-    res.redirect(`https://auth.mercadopago.com.ar/authorization?client_id=${app}&response_type=code&platform_id=mp&redirect_uri=${url}`);
-}
+    res.send(
+        `https://auth.mercadopago.com.ar/authorization?client_id=${app}&response_type=code&platform_id=mp&redirect_uri=${url}`
+    );
+};
 
 controlador.mercadopago.conect = async(req, res) => {
-    if (req.query.code != undefined && req.headers['access-token'] != undefined) {
+    if (req.query.code != undefined && req.headers["access-token"] != undefined) {
         console.log(req.query.code);
-        var vendedor = jwt.verify(req.headers['access-token'], process.env.CLAVE);
-        mercadopago.connect.getCredentials(process.env.ACCESS_TOKEN, req.query.code, 'http://localhost:33487/vendedor/configuracion').then(async result => {
-            var data = result;
-            console.log(data);
-            var vendedorUpdate = await Vendedores.update({ mercadopago: data }, {
-                where: {
-                    idusuario: vendedor.usuario.id
-                }
+        var vendedor = jwt.verify(req.headers["access-token"], process.env.CLAVE);
+        mercadopago.connect
+            .getCredentials(
+                process.env.ACCESS_TOKEN,
+                req.query.code,
+                "http://localhost:33487/vendedor/configuracion"
+            )
+            .then(async(result) => {
+                var data = result;
+                console.log(data);
+                var vendedorUpdate = await Vendedores.update({ mercadopago: data }, {
+                    where: {
+                        idusuario: vendedor.usuario.id,
+                    },
+                });
+                res.status(200).json(vendedorUpdate);
             });
-            res.status(200).json(vendedorUpdate);
-        });
     }
-}
+};
 
-controlador.setbaner = async(req, res) => {
-
-}
+controlador.setbaner = async(req, res) => {};
 
 module.exports = controlador;
