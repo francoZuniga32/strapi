@@ -93,45 +93,54 @@ controlador.instrumental.buy = async(req, res) => {
         req.params.id != undefined && req.headers["access-token"] != undefined
     );
     if (req.params.id != undefined && req.headers["access-token"] != undefined) {
-        var vendedor = await sequelize.query(
-            "SELECT Vendedores.* FROM Instrumentales, Vendedores WHERE Instrumentales.vendedor = Vendedores.idusuario AND Instrumentales.id = ?", {
-                replacements: [req.params.id],
-                type: QueryTypes.SELECT,
-            }
-        );
-
         var instrumental = await Instrumentales.findOne({
             where: {
                 id: req.params.id,
             },
         });
 
+        var vendedor = await Vendedores.findOne({
+            attributes: ["idusuario", "mercadopago"],
+            where: {
+                idusuario: instrumental.getDataValue("vendedor"),
+            },
+        });
+
         var comprador = jwt.verify(req.headers["access-token"], process.env.CLAVE);
-        if (vendedor && vendedor[0].mercadopago != undefined && instrumental) {
-            vendedor[0].mercadopago = JSON.parse(vendedor[0].mercadopago);
-            console.log(vendedor[0].mercadopago.body);
+        if (
+            vendedor &&
+            (await vendedor.getDataValue("mercadopago")) != undefined &&
+            instrumental
+        ) {
+            var mercadopagobody = JSON.parse(
+                await vendedor.getDataValue("mercadopago")
+            );
+            console.log(mercadopagobody);
             mercadopago.configure({
-                access_token: vendedor[0].mercadopago.body.access_token,
+                access_token: mercadopagobody.body.access_token,
             });
 
             var preference = {
                 items: [{
-                    title: vendedor[0].nombre,
+                    title: instrumental.getDataValue("nombre"),
                     quantity: 1,
                     currency_id: "ARS",
-                    unit_price: vendedor[0].precio,
+                    unit_price: instrumental.getDataValue("precio"),
                 }, ],
                 back_urls: {
-                    success: "http://localhost:3000/compras/",
-                    pending: "http://localhost:3000/compras/",
-                    failure: "http://localhost:3000/compras/",
+                    success: "http://localhost:3001/perfil/procesarcompra",
+                    pending: "http://localhost:3001/perfil/procesarcompra",
+                    failure: "http://localhost:3001/perfil/procesarcompra"
                 },
             };
-            preference.marketplace_fee = await porcentaje(vendedor[0].precio);
+            console.log(preference);
+            preference.marketplace_fee = await porcentaje(
+                instrumental.getDataValue("precio")
+            );
 
             var compra = await Compras.create({
                 usuario: comprador.usuario.id,
-                vendedor: await vendedor[0].idusuario,
+                vendedor: await vendedor.getDataValue("idusuario"),
                 tipo: 1,
             });
             preference.external_reference = compra.getDataValue("external_reference");

@@ -68,7 +68,21 @@ controlador.auth = async(req, res) => {
                     mensaje: "el usuario no esta registrado",
                 });
             } else {
+                var vendedor = await Vendedor.findOne({
+                    attributes: ["idusuario", "banner", "mercadopago"],
+                    where: {
+                        idusuario: usuario.getDataValue("id"),
+                    },
+                });
+
+                if (vendedor != null) {
+                    usuario.setDataValue("vendedor", true);
+                    usuario.setDataValue("banner", vendedor.getDataValue("banner"));
+                } else {
+                    usuario.setDataValue("vendedor", false);
+                }
                 //creamos el toke de usuario
+                console.log(usuario);
                 const token = jwt.sign({ usuario: usuario }, process.env.CLAVE, {
                     expiresIn: "3h",
                 });
